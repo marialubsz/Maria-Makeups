@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
@@ -32,7 +32,15 @@ export function MakeupItemForm({ onSubmit, initialData, onCancel }: MakeupItemFo
     if (!formData.name || !formData.brand || !formData.type) {
       return;
     }
-    onSubmit(formData);
+
+    const finalData = {
+      ...formData,
+      aquisitionPrice:
+      !formData.wasGift && (!formData.acquisitionPrice || formData.acquisitionPrice <= 0) 
+        ? formData.price
+        : formData.acquisitionPrice,
+    }
+    onSubmit(finalData);
     if (!initialData) {
       setFormData({
         name: '',
