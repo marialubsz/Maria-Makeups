@@ -16,7 +16,14 @@ export function MakeupItemCard({ item, onUpdate, onDelete }: MakeupItemCardProps
   const [isEditing, setIsEditing] = useState(false);
 
   const handleUpdate = (updatedItem: Omit<MakeupItem, 'id'>) => {
-    onUpdate(item.id, updatedItem);
+    // Garante que acquisitionPrice segue a regra
+    const finalItem = {
+      ...updatedItem,
+      acquisitionPrice: updatedItem.wasGift
+        ? 0
+        : updatedItem.acquisitionPrice || updatedItem.price,
+    };
+    onUpdate(item.id, finalItem);
     setIsEditing(false);
   };
 
@@ -25,12 +32,8 @@ export function MakeupItemCard({ item, onUpdate, onDelete }: MakeupItemCardProps
     return date.toLocaleDateString('pt-BR');
   };
 
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL',
-    }).format(price);
-  };
+  const formatPrice = (price: number) =>
+    new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(price);
 
   if (isEditing) {
     return (
@@ -53,7 +56,7 @@ export function MakeupItemCard({ item, onUpdate, onDelete }: MakeupItemCardProps
           <Badge variant="secondary">{item.type}</Badge>
         </div>
       </CardHeader>
-      
+
       <CardContent className="space-y-3">
         {item.shade && (
           <div>
@@ -62,7 +65,7 @@ export function MakeupItemCard({ item, onUpdate, onDelete }: MakeupItemCardProps
             </p>
           </div>
         )}
-        
+
         <div className="space-y-2">
           <div className="flex items-center gap-4 text-sm text-muted-foreground">
             <div className="flex items-center gap-1">
@@ -76,7 +79,7 @@ export function MakeupItemCard({ item, onUpdate, onDelete }: MakeupItemCardProps
               </div>
             )}
           </div>
-          
+
           <div className="space-y-1 text-sm">
             {item.price > 0 && (
               <div className="flex items-center gap-1 text-muted-foreground">
@@ -84,10 +87,10 @@ export function MakeupItemCard({ item, onUpdate, onDelete }: MakeupItemCardProps
                 <span>Preço: {formatPrice(item.price)}</span>
               </div>
             )}
-            {!item.wasGift && item.acquisitionPrice > 0 && (
+            {!item.wasGift && (
               <div className="flex items-center gap-1 text-green-600">
                 <DollarSign className="h-4 w-4" />
-                <span>Pago: {formatPrice(item.acquisitionPrice)}</span>
+                <span>Pago: {formatPrice(item.acquisitionPrice || item.price)}</span>
               </div>
             )}
           </div>
@@ -102,7 +105,7 @@ export function MakeupItemCard({ item, onUpdate, onDelete }: MakeupItemCardProps
           </div>
         )}
       </CardContent>
-      
+
       <CardFooter className="flex gap-2">
         <Button
           variant="outline"

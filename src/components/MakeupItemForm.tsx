@@ -27,20 +27,24 @@ export function MakeupItemForm({ onSubmit, initialData, onCancel }: MakeupItemFo
     notes: initialData?.notes || '',
   });
 
+  const handleChange = (field: string, value: string | number | boolean) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.name || !formData.brand || !formData.type) {
-      return;
-    }
+    if (!formData.name || !formData.brand || !formData.type) return;
 
-    const finalData = {
+    const finalData: Omit<MakeupItem, 'id'> = {
       ...formData,
-      aquisitionPrice:
-      !formData.wasGift && (!formData.acquisitionPrice || formData.acquisitionPrice <= 0) 
-        ? formData.price
-        : formData.acquisitionPrice,
-    }
+      price: Number(formData.price),
+      acquisitionPrice: formData.wasGift
+        ? 0
+        : Number(formData.acquisitionPrice) || Number(formData.price),
+    };
+
     onSubmit(finalData);
+
     if (!initialData) {
       setFormData({
         name: '',
@@ -56,16 +60,10 @@ export function MakeupItemForm({ onSubmit, initialData, onCancel }: MakeupItemFo
     }
   };
 
-  const handleChange = (field: string, value: string | number | boolean) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-  };
-
   return (
     <Card className="w-full max-w-2xl mx-auto">
       <CardHeader>
-        <CardTitle>
-          {initialData ? 'Editar Item' : 'Adicionar Novo Item'}
-        </CardTitle>
+        <CardTitle>{initialData ? 'Editar Item' : 'Adicionar Novo Item'}</CardTitle>
       </CardHeader>
       <form onSubmit={handleSubmit}>
         <CardContent className="space-y-4">
@@ -95,7 +93,10 @@ export function MakeupItemForm({ onSubmit, initialData, onCancel }: MakeupItemFo
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="type">Tipo *</Label>
-              <Select value={formData.type} onValueChange={(value) => handleChange('type', value)}>
+              <Select
+                value={formData.type}
+                onValueChange={(value) => handleChange('type', value)}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione o tipo" />
                 </SelectTrigger>
@@ -119,56 +120,54 @@ export function MakeupItemForm({ onSubmit, initialData, onCancel }: MakeupItemFo
             </div>
           </div>
 
-          <div className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="purchaseDate">Data de Compra</Label>
+              <Input
+                id="purchaseDate"
+                type="date"
+                value={formData.purchaseDate}
+                onChange={(e) => handleChange('purchaseDate', e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="price">Preço de Mercado (R$)</Label>
+              <Input
+                id="price"
+                type="number"
+                step="0.01"
+                min="0"
+                value={formData.price}
+                onChange={(e) => handleChange('price', parseFloat(e.target.value) || 0)}
+                placeholder="0.00"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="wasGift"
+                checked={formData.wasGift}
+                onCheckedChange={(checked) => handleChange('wasGift', checked)}
+              />
+              <Label htmlFor="wasGift">Foi ganhado de presente</Label>
+            </div>
+
+            {!formData.wasGift && (
               <div className="space-y-2">
-                <Label htmlFor="purchaseDate">Data de Compra</Label>
+                <Label htmlFor="acquisitionPrice">Preço Pago (R$)</Label>
                 <Input
-                  id="purchaseDate"
-                  type="date"
-                  value={formData.purchaseDate}
-                  onChange={(e) => handleChange('purchaseDate', e.target.value)}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="price">Preço de Mercado (R$)</Label>
-                <Input
-                  id="price"
+                  id="acquisitionPrice"
                   type="number"
                   step="0.01"
                   min="0"
-                  value={formData.price}
-                  onChange={(e) => handleChange('price', parseFloat(e.target.value) || 0)}
+                  value={formData.acquisitionPrice}
+                  onChange={(e) => handleChange('acquisitionPrice', parseFloat(e.target.value) || 0)}
                   placeholder="0.00"
                 />
               </div>
-            </div>
-
-            <div className="space-y-3">
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="wasGift"
-                  checked={formData.wasGift}
-                  onCheckedChange={(checked) => handleChange('wasGift', checked)}
-                />
-                <Label htmlFor="wasGift">Foi ganhado de presente</Label>
-              </div>
-
-              {!formData.wasGift && (
-                <div className="space-y-2">
-                  <Label htmlFor="acquisitionPrice">Preço Pago (R$)</Label>
-                  <Input
-                    id="acquisitionPrice"
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    value={formData.acquisitionPrice}
-                    onChange={(e) => handleChange('acquisitionPrice', parseFloat(e.target.value) || 0)}
-                    placeholder="0.00"
-                  />
-                </div>
-              )}
-            </div>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -182,6 +181,7 @@ export function MakeupItemForm({ onSubmit, initialData, onCancel }: MakeupItemFo
             />
           </div>
         </CardContent>
+
         <CardFooter className="flex gap-2">
           <Button type="submit" className="flex-1">
             {initialData ? 'Atualizar' : 'Adicionar Item'}

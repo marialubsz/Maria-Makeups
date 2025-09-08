@@ -123,12 +123,13 @@ export function MakeupItemList({ items, onUpdateItem, onDeleteItem }: MakeupItem
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredItems.map(item => (
-          <MakeupItemCard
-            key={item.id}
-            item={item}
-            onUpdate={onUpdateItem}
-            onDelete={onDeleteItem}
-          />
+          <div key={item.id}>
+            <MakeupItemCard
+              item={item}
+              onUpdate={onUpdateItem}
+              onDelete={onDeleteItem}
+            />
+          </div>
         ))}
       </div>
     </div>
