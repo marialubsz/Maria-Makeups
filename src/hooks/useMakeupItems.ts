@@ -3,7 +3,7 @@ import { MakeupItem } from "../types/makeup"
 
 const STORAGE_KEY = "makeup-items"
 // Agora aponta para o servidor Node/Express
-const API_BASE = "http://localhost:3001/make-server-d1d68d30"
+const API_BASE = "http://maria=makeups.vercel.app"
 
 export function useMakeupItems() {
   const [items, setItems] = useState<MakeupItem[]>([])
